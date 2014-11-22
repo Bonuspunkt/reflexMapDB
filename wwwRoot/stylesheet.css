@@ -1,0 +1,43 @@
+html {
+  font-family:'Segoe UI',Helvetica,Arial,sans-serif;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+body {
+  color: #0f0;
+  background: #000;
+}
+
+a, a:visited, a:hover {
+  color: #0f0;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+textarea {
+  color: #0f0;
+  background: #000;
+  border: 1px solid #0f0;
+}
+
+nav a {
+  margin: 0 10px 0 0;
+}
+
+.profileImg {
+  float: right;
+}
+
+.webPreview {
+  border: 1px solid #0f0;
+  display: block;
+  margin: 0 auto;
+  width: 960px;
+  height: 600px;
+}
+
