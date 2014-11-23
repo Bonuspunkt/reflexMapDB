@@ -18,11 +18,11 @@ var Profile = React.createClass({
     var created = entries.filter(function(e){ return e._type === 'created'; })[0];
 
     return (
-      <DefaultLayout title={ 'Profile ' + create.name } user={this.props.user}>
-        <h2>{ create.name }</h2>
+      <DefaultLayout title={ 'Profile ' + created.name } user={this.props.user}>
+        <h2>{ created.name }</h2>
         <img className="profileImg" src={ created.photo } />
         <ul>
-          { entries.map(function(e) { return <ProfileEntry key={e.timestamp} entry={e} /> }) }
+          { entries.map(function(e) { return <ProfileEntry key={e.timestamp} entry={e} user={created.id} /> }) }
         </ul>
       </DefaultLayout>
     );

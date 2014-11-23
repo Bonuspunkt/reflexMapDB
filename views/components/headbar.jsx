@@ -5,7 +5,7 @@ var HeadBar = React.createClass({
 
     var items = [
         <a href="/">Home</a>,
-        <a href="/maps">Maps</a>,
+        <a href="/maps/all">Maps</a>,
     ];
 
     if (this.props.user) {
@@ -30,7 +30,7 @@ var HeadBar = React.createClass({
 
     return (
       <header>
-        <h1>reflex map db</h1>
+        <h1>reflex map db prealpha prototype</h1>
         <nav>
         { items }
         </nav>

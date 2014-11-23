@@ -1,3 +1,4 @@
+*.jsonStream
 node_modules
 settings.json
 wwwRoot/0*

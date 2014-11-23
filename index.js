@@ -75,7 +75,7 @@ app.set('view engine', 'jsx');
 app.engine('jsx', require('express-react-views').createEngine());
 
 app.use(logger('dev'));
-app.use(multer({ fields: 1, fileSize: 2 * 1024 * 1024, files: 1 }));
+app.use(multer({ fields: 10, fileSize: 2 * 1024 * 1024, files: 1 }));
 app.use(session({ resave: true,
                 saveUninitialized: true,
                 secret: settings.secret }));  
@@ -124,51 +124,86 @@ app.get('/u/:steamId', function(req, res){
 });
 
 app.get('/u/:steamId/:map', function(req,res) {
-  console.log(req)
-  res.render('map', { user: req.user, mapPath: req.params.steamId + '/' + req.params.map })
+
+
+  readJsonStream(path.resolve(wwwRoot, req.params.steamId, req.params.map + '.jsonStream'), function(err, entries) {
+    res.render('map', { 
+      user: req.user, 
+      mapPath: req.params.steamId + '/' + req.params.map,
+      entries: entries
+    });
+  });
 });
 
-app.get('/upload', /*ensureAuthenticated,*/ function(req, res) {
+app.get('/maps/:type', function(req, res) {
+  var valid = ['all', '1v1', '2v2', 'tdm', 'ffa'];
+  if (valid.indexOf(req.params.type) === -1) {
+    return res.end('what are you trying')
+  }
+
+  readJsonStream(path.resolve(wwwRoot, req.params.type + '.jsonStream'), function(err, maps) {
+    if (err) { console.log(err); }
+    res.render('maps', { user: req.user, maps: maps });
+  })
+});
+
+app.get('/upload', ensureAuthenticated, function(req, res) {
   res.render('upload', { user: req.user });
 });
 
-app.post('/upload', /*ensureAuthenticated,*/ function(req, res) {
-  req.user = { id: '76561197993632369' };
+app.post('/upload', ensureAuthenticated, function(req, res) {
 
   if (!req.files.map) {
+    Object.keys(req.files).forEach(function(key) { fs.unlink(req.files[key].path); });
     return res.end('how about uploading a file?');
   }
 
   var userDir = path.resolve(wwwRoot, req.user.id);
 
   var filename = req.files.map.originalname;
+  var filenameWithoutExtension = filename.substring(0, filename.lastIndexOf('.'));
+
   var mapFile = path.resolve(userDir, filename);
+  var types = [];
+  if (req.body['1v1']) { types.push('1v1'); }
+  if (req.body['2v2']) { types.push('2v2'); }
+  if (req.body.tdm) { types.push('tdm'); }
+  if (req.body.ffa) { types.push('ffa'); }
 
   fs.exists(mapFile, function(exists) {
+    if (exists) { fs.unlinkSync(mapFile); }
 
     fs.rename(req.files.map.path, path.resolve(userDir, mapFile));
     
-    var filenameWithoutExtension = filename.substring(0, filename.lastIndexOf('.'));
-    fs.createWriteStream(path.resolve(userDir, filenameWithoutExtension + '.txt'));
-    fs.end(req.fields.readme);
-
-    // TODO: remove all files
-    Object.keys(req.files).forEach(function(key) { fs.unlink(req.files[key].path); });
+    // write readme
+    fs.createWriteStream(path.resolve(userDir, filenameWithoutExtension + '.txt')).end(req.body.readme);
     
+    // write to user profile
     var profilePath = path.resolve(userDir, 'profile.jsonStream');
     var profile = createJsonStreamWriter(profilePath);
-    profile.write({_type: 'map', name: filenameWithoutExtension });
+    profile.write({_type: 'map', file: filenameWithoutExtension, name: req.body.name });
     profile.close();
 
+    // write map infos
     var mapPath = path.resolve(userDir, filenameWithoutExtension + '.jsonStream');
     var map = createJsonStreamWriter(mapPath);
-    map.write({_type: exists ? 'update' : 'create'});
+    map.write({ _type: exists ? 'update' : 'create', types: types, name: req.body.name, user: { id: req.user.id, name: req.user.displayName } });
     map.close();
 
+    // write entry to map types
+    types.forEach(function(type) {
+      var typePath = path.resolve(wwwRoot, type + '.jsonStream');
+      var typeStream = createJsonStreamWriter(typePath);
+      typeStream.write({ name: req.body.name, user: { id: req.user.id, name: req.user.displayName }, filename: filenameWithoutExtension })
+    });
+    // and the other map view
+    var commonMapPath = path.resolve(wwwRoot, 'all.jsonStream');
+    var commonStream = createJsonStreamWriter(commonMapPath);
+    commonStream.write({ name: req.body.name, user: { id: req.user.id, name: req.user.displayName }, filename: filenameWithoutExtension })
 
     res.redirect('/u/' + req.user.id + '/' + filenameWithoutExtension);
 
-  })
+  });
 });
 
 

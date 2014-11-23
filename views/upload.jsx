@@ -40,7 +40,6 @@ var Upload = React.createClass({
             By posting your map here you acknowledge:
             <ul>
               <li>That you have full rights to the map you are posting</li>
-              <li>The file will be available from this website</li>
             </ul>
           </p>
 

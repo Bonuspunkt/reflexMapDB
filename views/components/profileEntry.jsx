@@ -8,7 +8,7 @@ var ProfileEntry = React.createClass({
       case 'created':
         return <li>{ entry.timestamp } account created</li>
       case 'map':
-        return <li>{ entry.timestamp } map { entry.map } uploaded</li>
+        return (<li>{ entry.timestamp } map <a href={ '/u/' + this.props.user + '/' + entry.file }>{entry.name}</a> uploaded</li>);
       default:
         return <li>unmapped</li>
     }
