@@ -1,22 +1,28 @@
 var fs = require('fs');
 var path = require('path');
 var util = require('util');
+var Q = require('q');
 
-var createJsonStreamWriter = require('./lib/createJsonStreamWriter');
-var readJsonStream = require('./lib/readJsonStream')
+var db = require('./lib/promiseDb');
 var settings = require('./settings');
 
 var express = require('express');
 var multer = require('multer');
 var logger = require('morgan');
+var csrf = require('csurf')
+
+var pg = require('pg')
 var session = require('express-session');
+var pgSession = require('connect-pg-simple')(session);
 
 var passport = require('passport');
 var SteamStrategy = require('passport-steam').Strategy;
 
 var wwwRoot = path.resolve(__dirname, 'wwwRoot');
+var mapDir = path.resolve(wwwRoot, 'dl');
 
-// TODO:
+var mapTypes = settings.mapTypes;
+
 // Passport session setup.
 //   To support persistent login sessions, Passport needs to be able to
 //   serialize users into and deserialize users out of the session.  Typically,
@@ -44,28 +50,23 @@ passport.use(new SteamStrategy({
   },
   function(identifier, profile, done) {
 
-    var targetDir = path.resolve(wwwRoot, profile.id);
-    fs.mkdir(targetDir, function(err) {
-      if (!err) { 
-        var profilePath = path.resolve(targetDir, 'profile.jsonStream');
-        var profileStream = createJsonStreamWriter(profilePath);
-        profileStream.write({
-          _type: 'created',
-          id: profile.id,
-          name: profile.displayName,
-          photo: profile.photos[2].value
-        });
-        profileStream.close();
-      }
+    var internalProfile = {
+      openId: identifier,
+      name: profile.displayName,
+      imgUrl: profile.photos[2].value
+    };
 
-      profile.identifier = identifier;
-      return done(null, profile); 
-    });
+    db.author
+      .getAuthorId(internalProfile)
+      .then(function(result) {
+        internalProfile.id = result.rows[0].id;
+        done(null, internalProfile);
+      }, function(error) {
+        done(error);
+      }
+    );
   }
 ));
-
-
-
 
 var app = express();
 
@@ -76,14 +77,30 @@ app.engine('jsx', require('express-react-views').createEngine());
 
 app.use(logger('dev'));
 app.use(multer({ fields: 10, fileSize: 2 * 1024 * 1024, files: 1 }));
-app.use(session({ resave: true,
-                saveUninitialized: true,
-                secret: settings.secret }));  
+app.use(session({
+  cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 }, // 30 days
+  resave: true,
+  saveUninitialized: false,
+  secret: settings.secret,
+  store: new pgSession({
+    pg : pg,
+    conString : settings.database,
+  }),
+}));
 // Initialize Passport!  Also use passport.session() middleware, to support
 // persistent login sessions (recommended).
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(wwwRoot));
+
+app.use(csrf());
+app.use(function (err, req, res, next) {
+  if (err.code !== 'EBADCSRFTOKEN') return next(err)
+
+  // handle CSRF token errors here
+  res.status(403)
+  res.send('session has expired or form tampered with')
+});
 
 
 app.get('/', function(req, res){
@@ -117,95 +134,112 @@ app.get('/logout', function(req, res){
   res.redirect('/');
 });
 
-app.get('/u/:steamId', function(req, res){
-  readJsonStream(path.resolve(wwwRoot, req.params.steamId, 'profile.jsonStream'), function(err, entries) {
-    res.render('profile', { user: req.user, entries: entries });
-  })
-});
+app.get('/u/:id', function(req, res){
+  var authorId = req.params.id;
 
-app.get('/u/:steamId/:map', function(req,res) {
-
-
-  readJsonStream(path.resolve(wwwRoot, req.params.steamId, req.params.map + '.jsonStream'), function(err, entries) {
-    res.render('map', { 
+  Q.all([
+    db.author.getById(authorId),
+    db.map.getByAuthorId(authorId, 0)
+  ]).then(function(results) {
+    res.render('profile', { 
       user: req.user, 
-      mapPath: req.params.steamId + '/' + req.params.map,
-      entries: entries
+      profile: results[0].rows[0],
+      maps: results[1].rows,
+      csrfToken: req.csrfToken(),
     });
+  }, function(err) {
+    res.end(':(');
   });
 });
 
 app.get('/maps/:type', function(req, res) {
-  var valid = ['all', '1v1', '2v2', 'tdm', 'ffa'];
+
+  var valid = Object.keys(mapTypes);
   if (valid.indexOf(req.params.type) === -1) {
     return res.end('what are you trying')
   }
 
-  readJsonStream(path.resolve(wwwRoot, req.params.type + '.jsonStream'), function(err, maps) {
-    if (err) { console.log(err); }
-    res.render('maps', { user: req.user, maps: maps });
+  db.map.getByType(mapTypes[req.params.type], 0).then(function(result) {
+    res.render('maps', { user: req.user, maps: result.rows });
   })
 });
 
-app.get('/upload', ensureAuthenticated, function(req, res) {
-  res.render('upload', { user: req.user });
-});
+app.get('/m/:map', function(req,res) {
+  var mapId = req.params.map;
+  
+  Q.all([
+    db.map.getById(mapId),
+    db.mapStar.getByMapId(mapId),
+    db.mapComment.getByMapId(mapId)
+  ]).then(function(results) {
 
-app.post('/upload', ensureAuthenticated, function(req, res) {
-
-  if (!req.files.map) {
-    Object.keys(req.files).forEach(function(key) { fs.unlink(req.files[key].path); });
-    return res.end('how about uploading a file?');
-  }
-
-  var userDir = path.resolve(wwwRoot, req.user.id);
-
-  var filename = req.files.map.originalname;
-  var filenameWithoutExtension = filename.substring(0, filename.lastIndexOf('.'));
-
-  var mapFile = path.resolve(userDir, filename);
-  var types = [];
-  if (req.body['1v1']) { types.push('1v1'); }
-  if (req.body['2v2']) { types.push('2v2'); }
-  if (req.body.tdm) { types.push('tdm'); }
-  if (req.body.ffa) { types.push('ffa'); }
-
-  fs.exists(mapFile, function(exists) {
-    if (exists) { fs.unlinkSync(mapFile); }
-
-    fs.rename(req.files.map.path, path.resolve(userDir, mapFile));
-    
-    // write readme
-    fs.createWriteStream(path.resolve(userDir, filenameWithoutExtension + '.txt')).end(req.body.readme);
-    
-    // write to user profile
-    var profilePath = path.resolve(userDir, 'profile.jsonStream');
-    var profile = createJsonStreamWriter(profilePath);
-    profile.write({_type: 'map', file: filenameWithoutExtension, name: req.body.name });
-    profile.close();
-
-    // write map infos
-    var mapPath = path.resolve(userDir, filenameWithoutExtension + '.jsonStream');
-    var map = createJsonStreamWriter(mapPath);
-    map.write({ _type: exists ? 'update' : 'create', types: types, name: req.body.name, user: { id: req.user.id, name: req.user.displayName } });
-    map.close();
-
-    // write entry to map types
-    types.forEach(function(type) {
-      var typePath = path.resolve(wwwRoot, type + '.jsonStream');
-      var typeStream = createJsonStreamWriter(typePath);
-      typeStream.write({ name: req.body.name, user: { id: req.user.id, name: req.user.displayName }, filename: filenameWithoutExtension })
+    res.render('map', {
+      user: req.user,
+      map: results[0].rows[0],
+      stars: results[1].rows,
+      comments: results[2].rows,
+      csrfToken: req.csrfToken(),
     });
-    // and the other map view
-    var commonMapPath = path.resolve(wwwRoot, 'all.jsonStream');
-    var commonStream = createJsonStreamWriter(commonMapPath);
-    commonStream.write({ name: req.body.name, user: { id: req.user.id, name: req.user.displayName }, filename: filenameWithoutExtension })
-
-    res.redirect('/u/' + req.user.id + '/' + filenameWithoutExtension);
-
+  }, function(err) {
+    console.log(err)
+    res.end(':(')
   });
 });
 
+app.post('/m/:mapId', function(req, res) {
+  var type = 0;
+  Object.keys(mapTypes)
+    .filter(function(mapType) { return req.body[mapType]; })
+    .forEach(function(mapType){ type += mapTypes[mapType]; });
+
+  db.map.update({
+    authorId: req.user.id,
+    mapId: Number(req.params.mapId) ,
+    name: req.body.name,
+    types: type,
+    readme: req.body.readme
+  }).then(function(result) {
+    res.redirect('/m/' + req.params.mapId);
+  });
+})
+
+app.post('/upload', ensureAuthenticated, function(req, res) {
+
+  if (!req.files.map || !/\.map$/.test(req.files.map.originalname)) {
+    Object.keys(req.files).forEach(function(key) { fs.unlink(req.files[key].path); });
+    return res.end('how about uploading a map file?');
+  }
+
+  // TODO: Parse uploaded file
+
+  var filename = req.files.map.originalname.toLowerCase();
+  var filenameWithoutExtension = filename.substring(0, filename.lastIndexOf('.'));
+
+  // make one of the stupid functions
+  db.map.save({ 
+    authorId: req.user.id, 
+    filename: filenameWithoutExtension
+  }).then(function(result) {
+
+    fs.rename(req.files.map.path, path.resolve(mapDir, filename));
+    res.redirect('/m/' + result.rows[0].id);
+
+  }, function(error) {
+    fs.unlink(req.files.map.path);
+    // TODO: info msg
+  });
+});
+
+/*
+MAP NAME
+
+var type = 0;
+Object.keys(mapTypes)
+  .filter(function(mapType) { return req.body[mapType]; })
+  .forEach(function(mapType){ type += mapTypes[mapType]; });
+
+README
+*/
 
 
 app.listen(3000);

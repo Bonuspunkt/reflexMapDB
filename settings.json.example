@@ -1,5 +1,15 @@
 {
   "steamApiKey": "00000000000000000000000000000000",
   "hostURL": "http://localhost:3000/",
-  "secret": "generateThisOne"
-}
+  "secret": "generateThisOne",
+  "database": "postgres://username:password@localhost/database",
+
+  "mapTypes": {
+    "all": 0,
+    "1v1": 1,
+    "2v2": 2,
+    "tdm": 4,
+    "ffa": 8,
+    "defrag": 16
+  }
+}  

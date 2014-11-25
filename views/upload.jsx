@@ -29,6 +29,7 @@ var Upload = React.createClass({
             <label><input name="2v2" type="checkbox"/>2v2</label>
             <label><input name="tdm" type="checkbox"/>TDM</label>
             <label><input name="ffa" type="checkbox"/>FFA</label>
+            <label><input name="defrag" type="checkbox"/>Defrag</label>
           </p>
           <p>
             <label>readme</label><br/>

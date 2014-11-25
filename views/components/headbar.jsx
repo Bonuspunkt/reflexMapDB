@@ -10,10 +10,9 @@ var HeadBar = React.createClass({
 
     if (this.props.user) {
       items.push(
-        <a href="/upload">Upload</a>,
         <div style={ {float: 'right' } }>
           <a href={ '/u/' + this.props.user.id }>
-            {this.props.user.displayName}
+            {this.props.user.name}
           </a>
           <a href="/logout">Log Out</a>
         </div>
@@ -30,8 +29,8 @@ var HeadBar = React.createClass({
 
     return (
       <header>
-        <h1>reflex map db prealpha prototype</h1>
-        <nav>
+        <h1>reflex map db</h1>
+        <nav className="topNav">
         { items }
         </nav>
       </header>

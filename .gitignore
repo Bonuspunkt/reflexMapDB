@@ -1,13 +1,3 @@
-*.jsonStream
 node_modules
 settings.json
-wwwRoot/0*
-wwwRoot/1*
-wwwRoot/2*
-wwwRoot/3*
-wwwRoot/4*
-wwwRoot/5*
-wwwRoot/6*
-wwwRoot/7*
-wwwRoot/8*
-wwwRoot/9*
+wwwRoot/dl/

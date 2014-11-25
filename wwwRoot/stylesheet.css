@@ -6,12 +6,12 @@ html {
 }
 
 body {
-  color: #0f0;
-  background: #000;
+  color: #222;
+  background: #eee;
 }
 
 a, a:visited, a:hover {
-  color: #cfc;
+  color: #222;
   text-decoration: none;
 }
 
@@ -20,16 +20,26 @@ a:hover {
 }
 
 textarea {
-  color: #0f0;
-  background: #000;
-  border: 1px solid #0f0;
+  color: #222;
+  background: #eee;
+  border: 1px solid #222;
 }
 
 nav a {
   margin: 0 10px 0 0;
 }
 
+.topNav {
+  background: #bbb;
+  padding: 5px;
+}
+.subNav {
+  background: #ccc;
+  padding: 5px;
+}
+
 .profileImg {
+  margin-top: 5px;
   float: right;
 }
 

@@ -7,17 +7,19 @@ var Maps = React.createClass({
 
     var mapEls = maps.map(function(map) {
       return (
-        <div> 
-          <a href={ '/u/' + map.user.id }>{ map.user.name }</a>
+        <div>
+          { map.updated.toJSON() }
+          <span> - </span>
+          <a href={ '/u/' + map.authorid }>{ map.authorname }</a>
           <span> / </span>
-          <a href={ '/u/' + map.user.id + '/' + map.filename }>{map.name}</a>
+          <a href={ '/m/' + map.id }>{map.name || map.filename }</a>
         </div>
       );
     });
 
     return (
       <DefaultLayout title="upload map" user={ this.props.user }>
-        <nav>
+        <nav className="subNav">
           <a href="/maps/all">all</a>
           <a href="/maps/1v1">1v1</a>
           <a href="/maps/2v2">2v2</a>
