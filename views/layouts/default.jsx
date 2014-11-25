@@ -13,6 +13,12 @@ var DefaultLayout = React.createClass({
         <body>
           <HeadBar user={this.props.user} />
           {this.props.children}
+          <footer style={ {textAlign: 'center', marginTop: 50} }>
+            <small>
+              public test - searching for someone to take over<br/>
+              stack: <a href="https://nodejs.org">node.js</a> / <a href="http://www.postgresql.org/">PostgreSQL</a>
+            </small>
+          </footer>
         </body>
       </html>
     );

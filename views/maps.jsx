@@ -1,5 +1,6 @@
 var React = require('react');
 var DefaultLayout = require('./layouts/default');
+var mapTypes = require('../const').mapTypes;
 
 var Maps = React.createClass({
   render: function() {
@@ -7,7 +8,7 @@ var Maps = React.createClass({
 
     var mapEls = maps.map(function(map) {
       return (
-        <div>
+        <div key={map.id}>
           { map.updated.toJSON() }
           <span> - </span>
           <a href={ '/u/' + map.authorid }>{ map.authorname }</a>
@@ -18,13 +19,13 @@ var Maps = React.createClass({
     });
 
     return (
-      <DefaultLayout title="upload map" user={ this.props.user }>
+      <DefaultLayout title="maps" user={ this.props.user }>
         <nav className="subNav">
-          <a href="/maps/all">all</a>
-          <a href="/maps/1v1">1v1</a>
-          <a href="/maps/2v2">2v2</a>
-          <a href="/maps/tdm">tdm</a>
-          <a href="/maps/ffa">ffa</a>
+          { 
+            Object.keys(mapTypes).map(function(mapType, i) {
+              return <a key={ mapTypes[i] } href={ '/maps/' + mapType }>{ mapType }</a>
+            })
+          }
         </nav>
         <h2>maps</h2>
         { mapEls }

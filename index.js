@@ -21,7 +21,7 @@ var SteamStrategy = require('passport-steam').Strategy;
 var wwwRoot = path.resolve(__dirname, 'wwwRoot');
 var mapDir = path.resolve(wwwRoot, 'dl');
 
-var mapTypes = settings.mapTypes;
+var mapTypes = require('./const').mapTypes;
 
 // Passport session setup.
 //   To support persistent login sessions, Passport needs to be able to
@@ -132,19 +132,23 @@ app.get('/auth/steam/return',
 app.get('/logout', function(req, res){
   req.logout();
   res.redirect('/');
-});
+});  
 
-app.get('/u/:id', function(req, res){
+// -----------------------------------------------------------------------------
+
+app.get('/u/:id/:page?', function(req, res){
   var authorId = req.params.id;
 
   Q.all([
     db.author.getById(authorId),
-    db.map.getByAuthorId(authorId, 0)
+    db.map.getByAuthorId(authorId, 0),
+    db.authorStar.getByAuthorId(authorId)
   ]).then(function(results) {
     res.render('profile', { 
       user: req.user, 
       profile: results[0].rows[0],
       maps: results[1].rows,
+      stars: results[2].rows,
       csrfToken: req.csrfToken(),
     });
   }, function(err) {
@@ -152,20 +156,44 @@ app.get('/u/:id', function(req, res){
   });
 });
 
-app.get('/maps/:type', function(req, res) {
+app.post('/u/:id/star', ensureAuthenticated, function(req, res) {
+  var authorId = req.params.id;
+
+  db.authorStar.star(authorId, req.user.id)
+    .then(function() {
+      res.redirect('/u/' + authorId);
+    }, function(err) {
+      res.end('XD');
+    })
+});
+
+app.post('/u/:id/unstar', ensureAuthenticated, function(req, res) {
+  var authorId = req.params.id;
+
+  db.authorStar.unstar(authorId, req.user.id)
+    .then(function() {
+      res.redirect('/u/' + authorId);
+    }, function(err) {
+      console.log(err);
+      res.end('XD');
+    });
+});
+// -----------------------------------------------------------------------------
+
+app.get('/maps/:type/:page?', function(req, res) {
 
   var valid = Object.keys(mapTypes);
   if (valid.indexOf(req.params.type) === -1) {
     return res.end('what are you trying')
   }
 
-  db.map.getByType(mapTypes[req.params.type], 0).then(function(result) {
+  db.map.getByType(mapTypes[req.params.type],  0).then(function(result) {
     res.render('maps', { user: req.user, maps: result.rows });
   })
 });
 
-app.get('/m/:map', function(req,res) {
-  var mapId = req.params.map;
+app.get('/m/:mapId', function(req,res) {
+  var mapId = req.params.mapId;
   
   Q.all([
     db.map.getById(mapId),
@@ -181,7 +209,6 @@ app.get('/m/:map', function(req,res) {
       csrfToken: req.csrfToken(),
     });
   }, function(err) {
-    console.log(err)
     res.end(':(')
   });
 });
@@ -201,7 +228,29 @@ app.post('/m/:mapId', function(req, res) {
   }).then(function(result) {
     res.redirect('/m/' + req.params.mapId);
   });
-})
+});
+
+app.post('/m/:mapId/star', ensureAuthenticated, function(req, res) {
+  var mapId = req.params.mapId;
+
+  db.mapStar.star(mapId, req.user.id)
+    .then(function() {
+      res.redirect('/m/' + mapId);
+    }, function(err) {
+      res.end('XD');
+    })
+});
+
+app.post('/m/:mapId/unstar', ensureAuthenticated, function(req, res) {
+  var mapId = req.params.mapId;
+
+  db.mapStar.unstar(mapId, req.user.id)
+    .then(function() {
+      res.redirect('/m/' + mapId);
+    }, function(err) {
+      res.end('XD');
+    });
+});
 
 app.post('/upload', ensureAuthenticated, function(req, res) {
 
@@ -229,17 +278,6 @@ app.post('/upload', ensureAuthenticated, function(req, res) {
     // TODO: info msg
   });
 });
-
-/*
-MAP NAME
-
-var type = 0;
-Object.keys(mapTypes)
-  .filter(function(mapType) { return req.body[mapType]; })
-  .forEach(function(mapType){ type += mapTypes[mapType]; });
-
-README
-*/
 
 
 app.listen(3000);

@@ -4,13 +4,13 @@ var HeadBar = React.createClass({
   render: function() {
 
     var items = [
-        <a href="/">Home</a>,
-        <a href="/maps/all">Maps</a>,
+        <a key="home" href="/">Home</a>,
+        <a key="maps" href="/maps/all">Maps</a>,
     ];
 
     if (this.props.user) {
       items.push(
-        <div style={ {float: 'right' } }>
+        <div key="user" style={ {float: 'right' } }>
           <a href={ '/u/' + this.props.user.id }>
             {this.props.user.name}
           </a>
@@ -19,7 +19,7 @@ var HeadBar = React.createClass({
       );
     } else {
       items.push(
-        <div style={ {float: 'right' } }>
+        <div key="login" style={ {float: 'right' } }>
           <a href="/auth/steam">
             <img src="https://steamcommunity-a.akamaihd.net/public/images/signinthroughsteam/sits_small.png" />
           </a>

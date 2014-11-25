@@ -2,15 +2,19 @@ var React = require('react');
 
 var DefaultLayout = require('./layouts/default');
 var ProfileEntry = require('./components/profileEntry');
+var MapUpload = require('./components/mapUpload');
+var StarAuthor = require('./components/starAuthor')
 
 var Profile = React.createClass({
   render: function() {
     var profile = this.props.profile;
     var maps = this.props.maps;
+    var user = this.props.user
+    var csrfToken = this.props.csrfToken;
 
     if (!profile) {
       return (
-        <DefaultLayout title=":D" user={this.props.user}>
+        <DefaultLayout title=":D" user={user}>
           user does not exist
         </DefaultLayout>
       );
@@ -20,6 +24,12 @@ var Profile = React.createClass({
       <DefaultLayout title={ 'Profile ' + profile.name } user={this.props.user}>
         <img className="profileImg" src={ profile.imgurl } />
         <h2>{ profile.name }</h2>
+        {
+          user 
+            ? <StarAuthor authorId={ profile.id } stars={ this.props.stars } user={ user } csrfToken={ csrfToken } />
+            : ''
+
+        }
         <h3>Maps</h3>
         <ul>
           { maps.map(function(map) { 
@@ -28,23 +38,11 @@ var Profile = React.createClass({
           }
         </ul>
 
-        <h3>Upload map</h3>
-        <form action="/upload" method="POST" encType="multipart/form-data">
-          <input type="hidden" name="_csrf" value={ this.props.csrfToken } />
-          <p>
-            <label htmlFor="upload_file">map file</label>
-            <input id="upload_file" type="file" name="map" />
-          </p>
-
-          <p>
-            By posting your map here you acknowledge:
-            <ul>
-              <li>That you have full rights to the map you are posting</li>
-            </ul>
-          </p>
-
-          <button type="submit">submit</button>
-        </form>
+        {
+          user && user.id === profile.id 
+            ? <MapUpload csrfToken={this.props.csrfToken} />
+            : ''
+        }
 
       </DefaultLayout>
     );
