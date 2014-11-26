@@ -290,7 +290,10 @@ app.get('/api', function (req, res) {
       res.end(JSON.stringify({
         now: now,
         toUpdate: result.rows.map(function(row) {
-          return settings.hostURL + 'dl/' + row.filename + '.map';
+          return {
+            lastUpdated: row.updated,
+            url: settings.hostURL + 'dl/' + row.filename + '.map'
+          };
         })
       }));
     }, function(err) {
@@ -300,15 +303,17 @@ app.get('/api', function (req, res) {
 });
 
 app.get('/api/:authorId', function(req, res) {
-  var since = new Date(req.query.since || 0);
   var now = new Date();
-  db.api.byUser(req.params.authorId, since)
+  db.api.byUser(req.params.authorId)
     .then(function(result) {
       res.writeHead(200, { 'content-type': 'application/json' });
       res.end(JSON.stringify({
         now: now,
         toUpdate: result.rows.map(function(row) {
-          return settings.hostURL + 'dl/' + row.filename + '.map';
+          return {
+            lastUpdated: row.updated,
+            url: settings.hostURL + 'dl/' + row.filename + '.map'
+          }
         })
       }));
     }, function(err) {
