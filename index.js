@@ -175,7 +175,6 @@ app.post('/u/:id/unstar', ensureAuthenticated, function(req, res) {
     .then(function() {
       res.redirect('/u/' + authorId);
     }, function(err) {
-      console.log(err);
       res.end('XD');
     });
 });
@@ -276,10 +275,32 @@ app.post('/upload', ensureAuthenticated, function(req, res) {
 
   }, function(error) {
     fs.unlink(req.files.map.path);
-    // TODO: info msg
+    res.end('XD');
   });
 });
 
+
+app.get('/api', function (req, res) {
+  var since = new Date(req.query.since || 0);
+  db.api.all(since)
+    .then(function(result) {
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify(result.rows));
+    }, function(err) {
+      res.end('XD')
+    });
+});
+
+app.get('/api/:authorId', function(req, res) {
+  var since = new Date(req.query.since || 0);
+  db.api.byUser(req.params.authorId, since)
+    .then(function(result) {
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify(result.rows));
+    }, function(err) {
+      res.end('XD');
+    });
+});
 
 app.listen(3000);
 
