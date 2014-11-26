@@ -15,8 +15,11 @@ var DefaultLayout = React.createClass({
           {this.props.children}
           <footer style={ {textAlign: 'center', marginTop: 50} }>
             <small>
-              public test - searching for someone to take over<br/>
-              stack: <a href="https://nodejs.org">node.js</a> / <a href="http://www.postgresql.org/">PostgreSQL</a>
+              public test<br/>
+              stack: { ' ' }
+              <a href="https://nodejs.org">node.js</a>{ ' ' }
+              <a href="http://www.postgresql.org/">PostgreSQL</a>{ ' ' }
+              <a href="http://steampowered.com">Powered by Steam</a>
             </small>
           </footer>
         </body>

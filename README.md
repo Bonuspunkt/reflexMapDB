@@ -1,17 +1,20 @@
 # Reflex Map DB
+
 ## required
 - nodejs 0.10+
 - postgresql 9.3+
 
-## installation
-### basic
-- npm install .
-- cp settings.json.example settings.json
-- edit settings.json to repesent your current setup
-- get the steam api key via http://steamcommunity.com/dev/apikey
+## setup
 ### database
-- create database
-- execute db/tables.sql
-- execute node_modules/connect-pg-simple/table.sql
+- execute `createdb <database>`
+- execute `psql -d <database> -f db/tables.sql`
+- execute `psql -d <database> -f db/functions.sql`
+- execute `psql -d <database> -f node_modules/connect-pg-simple/table.sql`
 
-### done? :D
+### the mapdb
+- run `npm install .`
+- cp settings.json.example settings.json
+- get the steam api key via http://steamcommunity.com/dev/apikey
+- edit settings.json to repesent your current setup
+
+## done

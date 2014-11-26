@@ -21,7 +21,7 @@ var HeadBar = React.createClass({
       items.push(
         <div key="login" style={ {float: 'right' } }>
           <a href="/auth/steam">
-            <img src="https://steamcommunity-a.akamaihd.net/public/images/signinthroughsteam/sits_small.png" />
+            <img src="https://steamcommunity-a.akamaihd.net/public/images/signinthroughsteam/sits_small.png" alt="login" />
           </a>
         </div>
       );
