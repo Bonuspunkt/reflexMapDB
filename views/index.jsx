@@ -11,11 +11,10 @@ var Home = React.createClass({
           <li>signin on the top right with steam</li>
           <li>you can upload maps from your profile</li>
           <li>there is also a map listing with filtering by type</li>
+          <li>api is available under <a href="/api">/api</a> or user specific starred stuff under <a href="/api/1">/api/*userId*</a></li>
         </ul>
         <h2>stuff that still needs to be done</h2>
         <ul>
-          <li>api</li>
-          <li>cli to update all subscribed maps (required for servers) which uses the api</li>
           <li>comment on map</li>
           <li>change background to black, use comic sans ms and brightskin green ;)</li>
           <li><em>maybe</em> user requests</li>
