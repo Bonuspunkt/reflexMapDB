@@ -56,7 +56,7 @@ var Map = React.createClass({
             : (
               <div>
                 <h3>readme</h3>
-                <div stype={{ whiteSpace: 'pre-line' }}>
+                <div style={{ whiteSpace: 'pre-line' }}>
                   { map.readme }
                 </div>
               </div>
