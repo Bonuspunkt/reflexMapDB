@@ -9,7 +9,7 @@ var Home = React.createClass({
         <h2>alright this is a first shot</h2>
         <ul>
           <li>signin on the top right with steam</li>
-          <li>you can upload maps from your profile</li>
+          <li>you can upload maps (yes .map files) from your profile</li>
           <li>there is also a map listing with filtering by type</li>
           <li>api is available under <a href="/api">/api</a> or user specific starred stuff under <a href="/api/1">/api/*userId*</a></li>
         </ul>

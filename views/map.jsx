@@ -56,7 +56,9 @@ var Map = React.createClass({
             : (
               <div>
                 <h3>readme</h3>
-                { map.readme }
+                <div stype={{ whiteSpace: 'pre-line' }}>
+                  { map.readme }
+                </div>
               </div>
               )
         }
@@ -67,9 +69,6 @@ var Map = React.createClass({
             Comments
           </div>
 
-          <div>
-            Stars
-          </div>
         </div>
       </DefaultLayout>
     );
