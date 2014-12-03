@@ -92,6 +92,15 @@ app.use(session({
 // persistent login sessions (recommended).
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use(function(req, res, next) {
+  if (/\.map/.test(req.url)) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  }
+  next();
+});
 app.use(express.static(wwwRoot));
 
 app.use(csrf());
