@@ -45,7 +45,7 @@ var Map = React.createClass({
         <div>type: { types }</div>
         
         <div style={ {margin: '10px 0'} }> 
-          <a href={ "/webView/#/dl/" + map.filename }>preview</a>
+          <a href={ "/webView/#/dl/" + map.filename + '.map' }>preview</a>
           <span> - </span>
           <a href={ '/dl/' + map.filename + '.map' }>download</a>
         </div>
