@@ -52,3 +52,9 @@ nav a {
   height: 600px;
 }
 
+.mapEntry {
+  padding: 2px;
+}
+.mapEntry:hover {
+  background: #ccc;
+}
