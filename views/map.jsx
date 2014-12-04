@@ -22,7 +22,7 @@ var Map = React.createClass({
     var types = Object.keys(mapTypes)
       .filter(function(type) { return map.types & mapTypes[type]; })
       .map(function(type) { 
-        return <a href={ '/maps/' + type  }>{type}</a>
+        return <a href={ '/maps/' + type  } style={{ margin: '0 5px' }}>{type}</a>
       });
 
     return (
