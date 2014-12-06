@@ -101,6 +101,8 @@ app.use(function(req, res, next) {
   }
   next();
 });
+
+express.static.mime.define({ 'text/x-reflexmap': ['map'] });
 app.use(express.static(wwwRoot));
 
 app.use(csrf());
