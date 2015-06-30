@@ -9,16 +9,22 @@
     "express": "^4.10.2",
     "express-react-views": "^0.6.0",
     "express-session": "^1.9.1",
+    "json-loader": "^0.5.2",
+    "jsx-loader": "^0.13.2",
     "morgan": "^1.5.0",
     "multer": "^0.1.6",
+    "node-libs-browser": "^0.5.2",
     "passport": "^0.2.1",
     "passport-steam": "^0.1.4",
     "pg": "^4.0.0",
     "q": "^1.1.1",
-    "react": "^0.12.1"
+    "react": "^0.12.1",
+    "webpack": "^1.9.10"
   },
   "devDependencies": {},
   "scripts": {
+    "pack": "webpack --optimize-minimize",
+    "watch": "webpack --watch -d",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

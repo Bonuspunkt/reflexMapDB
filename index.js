@@ -72,7 +72,7 @@ passport.use(new SteamStrategy({
 var app = express();
 
 // configure Express
-app.set('views', __dirname + '/views');
+app.set('views', __dirname + '/wwwScript/views');
 app.set('view engine', 'jsx');
 app.engine('jsx', require('express-react-views').createEngine());
 
@@ -94,7 +94,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(function(req, res, next) {
-  if (/\.map/.test(req.url)) {
+  if (/\.map$/.test(req.url)) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET, OPTIONS");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -144,7 +144,7 @@ app.get('/auth/steam/return',
 app.get('/logout', function(req, res){
   req.logout();
   res.redirect('/');
-});  
+});
 
 // -----------------------------------------------------------------------------
 
@@ -156,8 +156,8 @@ app.get('/u/:id/:page?', function(req, res){
     db.map.getByAuthorId(authorId, 0),
     db.authorStar.getByAuthorId(authorId)
   ]).then(function(results) {
-    res.render('profile', { 
-      user: req.user, 
+    res.render('profile', {
+      user: req.user,
       profile: results[0].rows[0],
       maps: results[1].rows,
       stars: results[2].rows,
@@ -167,6 +167,34 @@ app.get('/u/:id/:page?', function(req, res){
     res.end(':(');
   });
 });
+
+app.get('/uiApi/user/:id/:page?', function(req, res){
+  var authorId = req.params.id;
+
+  Q.all([
+    db.author.getById(authorId),
+    db.map.getByAuthorId(authorId, 0),
+    db.authorStar.getByAuthorId(authorId)
+  ]).then(function(results) {
+
+
+      res.writeHead(200, {
+        'content-type': 'application/json'
+      });
+      res.end(
+        JSON.stringify({
+          user: req.user,
+          profile: results[0].rows[0],
+          maps: results[1].rows,
+          stars: results[2].rows
+        })
+      );
+    }, function(err) {
+      res.end(':(');
+    });
+
+});
+
 
 app.post('/u/:id/star', ensureAuthenticated, function(req, res) {
   var authorId = req.params.id;
@@ -205,7 +233,7 @@ app.get('/maps/:type/:page?', function(req, res) {
 
 app.get('/m/:mapId', function(req,res) {
   var mapId = req.params.mapId;
-  
+
   Q.all([
     db.map.getById(mapId),
     db.mapStar.getByMapId(mapId),
@@ -276,8 +304,8 @@ app.post('/upload', ensureAuthenticated, function(req, res) {
   var filenameWithoutExtension = filename.substring(0, filename.lastIndexOf('.'));
 
   // make one of the stupid functions
-  db.map.save({ 
-    authorId: req.user.id, 
+  db.map.save({
+    authorId: req.user.id,
     filename: filenameWithoutExtension
   }).then(function(result) {
 

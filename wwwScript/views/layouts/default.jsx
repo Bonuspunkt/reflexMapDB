@@ -12,7 +12,9 @@ var DefaultLayout = React.createClass({
         </head>
         <body>
           <HeadBar user={this.props.user} />
-          {this.props.children}
+          <div id="content">
+            {this.props.children}
+          </div>
           <footer style={ {textAlign: 'center', marginTop: 50} }>
             <small>
               public test { ' | ' }
@@ -24,6 +26,7 @@ var DefaultLayout = React.createClass({
               <a href="http://steampowered.com">Powered by Steam</a>
             </small>
           </footer>
+          <script src="/script.js"></script>
         </body>
       </html>
     );

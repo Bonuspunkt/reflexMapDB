@@ -1,5 +1,5 @@
 var React = require('react');
-var mapTypes = require('../../const').mapTypes;
+var mapTypes = require('../../../const').mapTypes;
 
 var MapUpdate = React.createClass({
   render: function() {
@@ -33,8 +33,8 @@ var MapUpdate = React.createClass({
         </p>
         <p>
           <label>readme</label><br/>
-          <textarea name="readme" 
-            style={ { maxWidth: '100%', width: '100%', height: 200 } } 
+          <textarea name="readme"
+            style={ { maxWidth: '100%', width: '100%', height: 200 } }
             defaultValue={ map.readme }/>
         </p>
         <input type="submit" />

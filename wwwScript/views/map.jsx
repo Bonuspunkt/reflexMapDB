@@ -3,7 +3,7 @@ var DefaultLayout = require('./layouts/default');
 var MapUpdate = require('./components/mapUpdate');
 var StarMap = require('./components/starMap')
 
-var mapTypes = require('../const').mapTypes;
+var mapTypes = require('../../const').mapTypes;
 
 var Map = React.createClass({
   render: function() {
@@ -21,7 +21,7 @@ var Map = React.createClass({
 
     var types = Object.keys(mapTypes)
       .filter(function(type) { return map.types & mapTypes[type]; })
-      .map(function(type) { 
+      .map(function(type) {
         return <a href={ '/maps/' + type  } style={{ margin: '0 5px' }}>{type}</a>
       });
 
@@ -33,8 +33,8 @@ var Map = React.createClass({
           { map.name || map.filename }
         </h2>
 
-        { 
-          user 
+        {
+          user
             ? <StarMap mapId={ map.id } stars={ this.props.stars } user={ user } csrfToken={ csrfToken } />
             : ''
         }
@@ -43,14 +43,14 @@ var Map = React.createClass({
         <div>created: { map.created.toJSON() }</div>
         <div>filename: { map.filename }</div>
         <div>type: { types }</div>
-        
-        <div style={ {margin: '10px 0'} }> 
+
+        <div style={ {margin: '10px 0'} }>
           <a href={ "/webView/#/dl/" + map.filename + '.map' }>preview</a>
           <span> - </span>
           <a href={ '/dl/' + map.filename + '.map' }>download</a>
         </div>
 
-        { 
+        {
           (this.props.user && this.props.user.id == map.authorid)
             ? <MapUpdate csrfToken={ csrfToken } map={ this.props.map } />
             : (

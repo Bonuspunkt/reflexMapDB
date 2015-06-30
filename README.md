@@ -12,7 +12,7 @@
 - execute `psql -d <database> -f node_modules/connect-pg-simple/table.sql`
 
 ### webView
-generate the production version of (reflexWebMapView)[https://github.com/Bonuspunkt/reflexWebMapView] and place it at `wwwRoot\webView`
+generate the production version of [reflexWebMapView](https://github.com/Bonuspunkt/reflexWebMapView) and place it at `wwwRoot\webView`
 
 ### mapdb
 - run `npm install .`
@@ -21,12 +21,12 @@ generate the production version of (reflexWebMapView)[https://github.com/Bonuspu
 - edit settings.json to repesent your current setup
 
 ## optional - setup nginx
-you may search for proper instructions this is just a raw outline of the stuff i changes
+you may search for proper instructions this is just a raw outline of the stuff i changed
 
-### as reverse proxy
+### reverse proxy
 ```
 server {
-  // ...
+  # ...
 
   location / {
     proxy_pass http://127.0.0.1:3000;

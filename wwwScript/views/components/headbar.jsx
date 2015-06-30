@@ -5,7 +5,7 @@ var HeadBar = React.createClass({
 
     var items = [
         <a key="home" href="/">Home</a>,
-        <a key="maps" href="/maps/all">Maps</a>,
+        <a key="maps" href="/maps/all/">Maps</a>,
     ];
 
     if (this.props.user) {
