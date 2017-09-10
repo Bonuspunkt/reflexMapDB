@@ -1,5 +1,7 @@
 # Reflex Map DB
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/Bonuspunkt/reflexMapDB.svg)](https://greenkeeper.io/)
+
 ## required
 - nodejs 0.10+
 - postgresql 9.3+
